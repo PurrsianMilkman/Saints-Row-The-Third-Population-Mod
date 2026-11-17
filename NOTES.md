@@ -120,3 +120,35 @@ Python helpers: never `.split(b"\0")` a 70 MB bytes object (hangs) - use index()
   autotest.cpp hooks 0x5D24E8). EXITS/LIMITS lines in the log. The game runs windowed; synthetic keys/clicks are ignored by the menu.
 - Uncommitted-in-game work since the last verified build: ped density override (0x130CB00 + reset 0x90F894), crowding threshold
   (0x90E3B0), EXITS/LIMITS diagnostics, autotest. Verified ALIVE 160-200 s in-world.
+
+## 2026-11-17 session summary (for the next session)
+Goal (user): far more traffic / peds / parked cars, without touching the exe on disk; fix causes, never lower numbers; user does NOT test -
+launch and verify yourself (tools/launch_test.ps1).
+
+Done today (all in population/, verified in game unless noted):
+- pools.cpp: capGetter (vtable[2] get_capacity per resized pool), dirtyBits (vtable[2] get_bits of dirty_update_impl<T> containers ->
+  private bitsets; THE frozen-car root cause), effect pool 5000 (slot table G relocated, 0x5C6EE0 stack frame rescaled), "permanent"
+  heap 32 MB (PermanentHeapMB; 0x5D3216/0x5D325A - load crash root cause).
+- limits.cpp: spawn tracker 150/48 -> pools (+16-bit handle, decoders 0x8F03D0 and 0x8F0266), Havok character jobs, action-node stack
+  array, anim registries 2048, wheel/tyre pools 255 (+null check 0xAD70D2), seat registry 512, co-op budget.
+- render.cpp: renderlib class caps, Havok TOI 4096, vehicle customisation slots 512 (+record pools).
+- audit.cpp: mempool ctor hooks (registry + ResourceScale scaling), engine warning hook 0x778910 (it is also a shared empty no-op),
+  can-alloc refusals, mempool errors.  crash.cpp: FAULT/FATAL + memory classification + dump.  autotest.cpp: AutoContinueSeconds.
+- counts.cpp: ped density override 0x130CB00 + reset 0x90F894 -> 1.0.  spawn.cpp: crowding throttle 0x90E3B0 4 -> 127.
+- diag.cpp: EXITS (per spawn-pass bail-out), LIMITS (live budget table), DESYNC (BROKEN: counts free slots - fix or remove).
+- tools: re_helpers.py, crash_report.py, dirty_sets.py, launch_test.ps1 (-Continue -MenuAt 60 -Set k=v; screenshot tests/last.png), keys.ps1.
+- audit/*.md: four static audits (npc, vehicle, effect, engine limits) done by subagents; every patch byte re-verified before use.
+- Published: public repo github.com/PurrsianMilkman/Saints-Row-The-Third-Population-Mod, commit 0d16acd, release v0.1.0-alpha
+  (prerelease, asi+ini attached). Do not push further without the user's word.
+
+Learned / gotchas:
+- Pool resize needs: alloc push + vtable[4] size + vtable[2] get_capacity + the type's dirty_update bitset (+ "permanent" headroom).
+- UAL loads plugins before CRT static init (GOG build, no CEG) -> static-initializer immediates can be patched at DllMain.
+- 0x9E7817 null-player read during load is a vanilla first-chance fault the game handles; my first reporter mistook it for the crash.
+- The main menu ignores synthetic keyboard/mouse (SendInput) -> the plugin calls 0x7ACC20 (Lua main_menu_continue) itself.
+- The menu background is a live city with traffic: counts taken at the menu are not in-world numbers.
+- Python heredocs in bash turn "\n" into real newlines and backticks break quoting: write edit scripts with the Write tool.
+- Agents' audit claims had one miss each time (second handle decoder 0x8F0266; extra G reference 0x5C3ECC) - always re-scan.
+
+State: mod DISABLED (files in C:\Games\SR3-population-mod-disabled\), work PAUSED by the user.
+Next: cave at 0x8F02C1 scaling the human split (peds 40 / drivers 30) -> then measure in-world with launch_test -Continue; fix DESYNC.
