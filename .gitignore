@@ -1,0 +1,18 @@
+# build output
+out/
+*.obj
+*.exp
+*.lib
+*.pdb
+*.ilk
+# never commit: game executables / memory dumps (contain game code + local paths), game screenshots, run logs
+*.exe
+*.dmp
+*.log
+*.png
+tests/
+tools/harness/run/
+# old builds and pre-split sources
+archive/
+__pycache__/
+*.pyc
