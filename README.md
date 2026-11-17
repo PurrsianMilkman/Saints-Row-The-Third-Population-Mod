@@ -47,6 +47,8 @@ responsible for a problem.
 
 **Uninstall:** delete the two `.asi` files and `SR3Population.ini`. The game files are never changed, so nothing needs restoring.
 
+Your support is greatly appreciated. Nothing is paywalled: https://www.patreon.com/cw/Purrsian
+
 ## Logs and crash reports
 
 `SR3Population.log` (in the game folder) contains:
